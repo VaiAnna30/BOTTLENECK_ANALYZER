@@ -1,10 +1,8 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-// Fast I/O for competitive programming / backend execution speed
 void fast_io() {
     #ifndef ONLINE_JUDGE
-        // Uncomment these if you want to test locally with files instead of the Node backend
         // freopen("inputf.txt", "r", stdin);
         // freopen("outputff.txt", "w", stdout);
     #endif
@@ -35,9 +33,7 @@ public:
     }
 
     void add_edge(int u, int v, int cap) {
-        // Directed edge from u to v
         adj[u].push_back({v, 0, cap, (int)adj[v].size()});
-        // Residual back-edge from v to u (initial capacity 0)
         adj[v].push_back({u, 0, 0, (int)adj[u].size() - 1});
     }
 
@@ -93,12 +89,10 @@ public:
         return totalflow;
     }
 
-    // New logic: Find the exact bottleneck edges (Min-Cut)
     vector<pair<int, int>> find_bottlenecks(int source) {
         vector<bool> visited(num_nodes, false);
         queue<int> q;
         
-        // 1. BFS to find all nodes reachable from the source in the residual graph
         q.push(source);
         visited[source] = true;
         
@@ -114,12 +108,10 @@ public:
             }
         }
         
-        // 2. Identify the cut: Edges from a VISITED node to an UNVISITED node
         vector<pair<int, int>> bottlenecks;
         for (int i = 0; i < num_nodes; i++) {
             if (visited[i]) {
                 for (auto &edge : adj[i]) {
-                    // Ignore the virtual reverse edges (initial capacity was 0)
                     if (!visited[edge.to] && edge.capacity > 0) {
                         bottlenecks.push_back({i, edge.to});
                     }
@@ -134,18 +126,8 @@ public:
 int main() {
     fast_io();
 
-    /* * Expecting input format:
-     * [num_nodes] [num_edges] [source_node] [sink_node]
-     * [u1] [v1] [capacity1]
-     * [u2] [v2] [capacity2]
-     * ...
-     */
-     
     int n, m, source, sink;
-    // If testing manually, you can hardcode these or type them in standard input.
-    // For Node.js integration, send these over stdin.
     if (!(cin >> n >> m >> source >> sink)) {
-        // Fallback hardcoded test case if no input is provided
         n = 4; m = 5; source = 0; sink = 3;
         Dinic dinic(n);
         dinic.add_edge(0, 1, 10);
@@ -165,7 +147,6 @@ int main() {
         return 0;
     }
 
-    // Dynamic processing for backend integration
     Dinic dinic(n);
     for (int i = 0; i < m; i++) {
         int u, v, cap;
@@ -173,13 +154,10 @@ int main() {
         dinic.add_edge(u, v, cap);
     }
 
-    // 1. Compute Max Flow
     int max_flow = dinic.calculate_max_flow(source, sink);
     
-    // 2. Find Bottlenecks
     vector<pair<int, int>> bottlenecks = dinic.find_bottlenecks(source);
 
-    // 3. Output results clearly for the Node.js parser
     cout << "MAX_FLOW: " << max_flow << "\n";
     cout << "BOTTLENECKS:\n";
     for (auto b : bottlenecks) {
