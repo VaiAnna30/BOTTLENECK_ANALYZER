@@ -1,0 +1,21 @@
+{
+  "name": "Standard Benchmark 1",
+  "expectedMaxFlow": 12,
+  "expectedBottleneck": [
+    { "u": 1, "v": 3 },
+    { "u": 2, "v": 3 }
+  ],
+  "payload": {
+    "numNodes": 4,
+    "numEdges": 5,
+    "source": 0,
+    "sink": 3,
+    "edges": [
+      { "u": 0, "v": 1, "capacity": 10 },
+      { "u": 1, "v": 3, "capacity": 4 },
+      { "u": 0, "v": 2, "capacity": 10 },
+      { "u": 2, "v": 3, "capacity": 8 },
+      { "u": 1, "v": 2, "capacity": 2 }
+    ]
+  }
+}

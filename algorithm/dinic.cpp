@@ -121,6 +121,18 @@ public:
         
         return bottlenecks;
     }
+
+    vector<tuple<int, int, int>> get_edge_flows() {
+        vector<tuple<int, int, int>> edge_flows;
+        for (int u = 0; u < num_nodes; u++) {
+            for (auto &edge : adj[u]) {
+                if (edge.capacity > 0) { // Only print original forward edges
+                    edge_flows.push_back({u, edge.to, edge.flow});
+                }
+            }
+        }
+        return edge_flows;
+    }
 };
 
 int main() {
@@ -138,11 +150,16 @@ int main() {
         
         int max_flow = dinic.calculate_max_flow(source, sink);
         vector<pair<int, int>> bottlenecks = dinic.find_bottlenecks(source);
+        vector<tuple<int, int, int>> edge_flows = dinic.get_edge_flows();
         
         cout << "MAX_FLOW: " << max_flow << "\n";
         cout << "BOTTLENECKS:\n";
         for (auto b : bottlenecks) {
             cout << b.first << " " << b.second << "\n";
+        }
+        cout << "EDGE_FLOWS:\n";
+        for (auto ef : edge_flows) {
+            cout << get<0>(ef) << " " << get<1>(ef) << " " << get<2>(ef) << "\n";
         }
         return 0;
     }
@@ -157,11 +174,16 @@ int main() {
     int max_flow = dinic.calculate_max_flow(source, sink);
     
     vector<pair<int, int>> bottlenecks = dinic.find_bottlenecks(source);
+    vector<tuple<int, int, int>> edge_flows = dinic.get_edge_flows();
 
     cout << "MAX_FLOW: " << max_flow << "\n";
     cout << "BOTTLENECKS:\n";
     for (auto b : bottlenecks) {
         cout << b.first << " " << b.second << "\n";
+    }
+    cout << "EDGE_FLOWS:\n";
+    for (auto ef : edge_flows) {
+        cout << get<0>(ef) << " " << get<1>(ef) << " " << get<2>(ef) << "\n";
     }
 
     return 0;
