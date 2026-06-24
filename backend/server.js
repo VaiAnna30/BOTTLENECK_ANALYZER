@@ -15,6 +15,9 @@ const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
+// Trust the reverse proxy (Render) to correctly identify client IPs for rate limiting
+app.set('trust proxy', 1);
+
 // This limits the number of requestion on the API endpoints to prevent abuse and ensurefair usage.
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
