@@ -6,7 +6,7 @@ RUN mkdir -p backend/engine
 RUN g++ algorithm/dinic.cpp -o backend/engine/dinic_engine -O3
 
 # Stage 2: Node Backend
-FROM node:18-bullseye-slim
+FROM node:20-bullseye-slim
 WORKDIR /app
 COPY backend/package*.json ./backend/
 WORKDIR /app/backend
