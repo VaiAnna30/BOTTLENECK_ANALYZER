@@ -267,10 +267,12 @@ export default function App() {
           if (isBottleneck && !nextRecommendations.some(r => r.edgeId === edge.id)) {
              const maxCapInNetwork = Math.max(...edges.map(e => parseInt(e.label.split(' ')[0]) || 0));
              const recommendedCap = Math.max(Math.ceil(capacity * 1.5), maxCapInNetwork, capacity + 10);
+             const sNode = nodes.find(n => n.id === edge.source);
+             const tNode = nodes.find(n => n.id === edge.target);
              nextRecommendations.push({
                edgeId: edge.id,
-               source: edge.source,
-               target: edge.target,
+               sourceLabel: sNode ? sNode.data.label : `Node ${edge.source}`,
+               targetLabel: tNode ? tNode.data.label : `Node ${edge.target}`,
                current: capacity,
                recommended: recommendedCap,
                improvement: Math.round(((recommendedCap - capacity) / capacity) * 100)
@@ -311,7 +313,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0d1117' }}>
+    <div className="app-container">
       
       {showAuthModal && (
         <AuthModal 
@@ -323,39 +325,31 @@ export default function App() {
         />
       )}
 
-      <div style={headerStyle}>
+      <div className="header-container">
         <div>
-          <h2 style={{ margin: 0, color: '#c9d1d9', fontSize: '1.5rem', fontWeight: 600 }}>Network Analyzer</h2>
-          <p style={{ margin: '4px 0 0 0', color: '#8b949e', fontSize: '0.9rem' }}>Topology design and bandwidth optimization.</p>
+          <h2 className="header-title">Network Analyzer</h2>
+          <p className="header-subtitle">Topology design and bandwidth optimization.</p>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="header-actions">
           {maxFlow !== null && (
-            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#10b981', marginRight: '16px', padding: '6px 12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div className="max-flow-badge">
               Max Flow: {maxFlow} Gbps
             </div>
           )}
 
           {user ? (
-             <div style={{ display: 'flex', alignItems: 'center', marginRight: '12px', color: '#8b949e', fontSize: '0.9rem' }}>
-                <span style={{ marginRight: '12px' }}>Welcome, <strong style={{ color: '#c9d1d9' }}>{user}</strong></span>
-                <button onClick={handleLogout} style={btnOutlineStyle}>Logout</button>
+             <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                <span style={{ marginRight: '12px' }}>Welcome, <strong style={{ color: 'var(--text-primary)' }}>{user}</strong></span>
+                <button onClick={handleLogout} className="btn btn-outline">Logout</button>
              </div>
           ) : (
-            <button onClick={() => setShowAuthModal(true)} style={btnOutlineStyle}>
+            <button onClick={() => setShowAuthModal(true)} className="btn btn-outline">
               Sign In
             </button>
           )}
-          
-          <button onClick={addRouterNode} style={btnStyle('#30363d', '#c9d1d9')}>
-            Add Router
-          </button>
 
-          <button onClick={deleteSelected} style={btnStyle('#dc2626', '#fff')}>
-            Delete Selected
-          </button>
-
-          <button onClick={handleSaveClick} disabled={loading} style={btnStyle('#10b981', '#fff', loading)}>
+          <button onClick={handleSaveClick} disabled={loading} className="btn btn-secondary">
             Save Network
           </button>
 
@@ -363,7 +357,8 @@ export default function App() {
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={() => setShowLoadMenu(!showLoadMenu)} 
-                style={btnStyle('#30363d', '#c9d1d9', loading)}
+                className="btn btn-secondary"
+                disabled={loading}
               >
                 Load Network
               </button>
@@ -371,7 +366,7 @@ export default function App() {
               {showLoadMenu && (
                 <div style={dropdownStyle}>
                   {savedNetworks.length === 0 ? (
-                    <div style={{ padding: '12px', color: '#8b949e', fontSize: '0.9rem' }}>No saved networks.</div>
+                    <div style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No saved networks.</div>
                   ) : (
                     savedNetworks.map(net => (
                       <div 
@@ -380,16 +375,16 @@ export default function App() {
                         style={dropdownItemStyle}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ fontWeight: 500, color: '#c9d1d9' }}>{net.name}</div>
+                          <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{net.name}</div>
                           <button 
                             onClick={(e) => deleteNetwork(net._id, e)} 
-                            style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '1rem', padding: '0 4px' }}
+                            style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', fontSize: '1rem', padding: '0 4px' }}
                             title="Delete network"
                           >
                             &times;
                           </button>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#8b949e', marginTop: '4px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                           {new Date(net.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -400,14 +395,25 @@ export default function App() {
             </div>
           )}
 
-          <button onClick={runAnalysis} disabled={loading} style={btnStyle('#238636', '#fff', loading)}>
-            {loading ? 'Processing...' : 'Run Simulation'}
-          </button>
         </div>
       </div>
 
-      <div style={{ flexGrow: 1, borderTop: '1px solid #30363d', position: 'relative' }} onClick={() => setShowLoadMenu(false)}>
+      <div style={{ flexGrow: 1, position: 'relative' }} onClick={() => setShowLoadMenu(false)}>
         
+        <div className="floating-toolbar">
+          <button onClick={addRouterNode} className="btn btn-secondary">
+             <span style={{marginRight: '6px', fontSize: '1.1rem'}}>➕</span> Add Router
+          </button>
+
+          <button onClick={deleteSelected} className="btn btn-danger">
+             <span style={{marginRight: '6px', fontSize: '1.1rem'}}>🗑️</span> Delete Selected
+          </button>
+
+          <button onClick={runAnalysis} disabled={loading} className="btn btn-primary" style={{ padding: '8px 24px' }}>
+             <span style={{marginRight: '8px', fontSize: '1.1rem'}}>🚀</span> {loading ? 'Processing...' : 'Run Simulation'}
+          </button>
+        </div>
+
         {showMetrics && <SimulationDashboard metrics={metrics} onClose={() => setShowMetrics(false)} />}
         {showRecs && <RecommendationsPanel recommendations={recommendations} onClose={() => setShowRecs(false)} />}
 
@@ -431,47 +437,13 @@ export default function App() {
   );
 }
 
-const headerStyle = {
-  padding: '16px 24px', 
-  backgroundColor: '#161b22', 
-  display: 'flex', 
-  justifyContent: 'space-between', 
-  alignItems: 'center',
-  borderBottom: '1px solid #30363d'
-};
-
-const btnStyle = (bgColor, color, disabled = false) => ({
-  padding: '8px 16px', 
-  fontSize: '0.9rem', 
-  backgroundColor: disabled ? '#30363d' : bgColor,
-  color: disabled ? '#8b949e' : color, 
-  border: '1px solid rgba(255,255,255,0.1)', 
-  borderRadius: '6px',
-  cursor: disabled ? 'not-allowed' : 'pointer', 
-  fontWeight: '600',
-  transition: 'all 0.2s ease',
-  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-});
-
-const btnOutlineStyle = {
-  padding: '8px 16px',
-  fontSize: '0.9rem',
-  backgroundColor: 'transparent',
-  color: '#10b981',
-  border: '1px solid #10b981',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: '600',
-  transition: 'all 0.2s ease',
-};
-
 const dropdownStyle = {
   position: 'absolute',
   top: '44px',
   right: '0',
-  backgroundColor: '#161b22',
-  borderRadius: '6px',
-  border: '1px solid #30363d',
+  backgroundColor: 'var(--bg-color)',
+  borderRadius: '8px',
+  border: '1px solid var(--panel-border)',
   boxShadow: '0px 8px 24px rgba(0,0,0,0.5)',
   minWidth: '220px',
   maxHeight: '300px',
@@ -481,7 +453,7 @@ const dropdownStyle = {
 
 const dropdownItemStyle = {
   padding: '12px 16px',
-  borderBottom: '1px solid #30363d',
+  borderBottom: '1px solid var(--panel-border)',
   cursor: 'pointer',
   display: 'flex',
   flexDirection: 'column',

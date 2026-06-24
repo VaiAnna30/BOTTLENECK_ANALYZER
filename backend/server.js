@@ -100,7 +100,6 @@ app.post('/api/analyze', analyzeLimiter, (req, res) => {
     const engine=spawn(ENGINE_PATH);
     let output_data='';
     let error_data='';
-    
     engine.stdin.write(input_string);
     engine.stdin.end();
     engine.stdout.on('data',(data)=>{
