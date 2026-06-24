@@ -1,0 +1,27 @@
+services:
+  # The Backend (Node.js + C++ via Docker)
+  - type: web
+    name: bottleneck-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    plan: free
+    envVars:
+      - key: MONGO_URI
+        sync: false # You will enter your MongoDB URL in the Render Dashboard securely
+      - key: JWT_SECRET
+        sync: false # You will enter a secret string in the Render Dashboard securely
+
+  # The Frontend (React + Vite)
+  - type: web
+    name: bottleneck-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Automatically links the frontend to the backend's live URL!
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: bottleneck-backend
+          envVarKey: RENDER_EXTERNAL_URL
